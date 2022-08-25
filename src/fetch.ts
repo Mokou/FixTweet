@@ -1,5 +1,7 @@
 import { Constants } from './constants';
 
+const API_ATTEMPTS = 16;
+
 export const fetchUsingGuest = async (
   status: string,
   event: FetchEvent
@@ -40,7 +42,7 @@ export const fetchUsingGuest = async (
 
   const cache = caches.default;
 
-  while (apiAttempts < 10) {
+  while (apiAttempts < API_ATTEMPTS) {
     const csrfToken = crypto
       .randomUUID()
       .replace(
@@ -75,7 +77,7 @@ export const fetchUsingGuest = async (
 
         This can effectively mean virtually unlimited (read) access to Twitter's API,
         which is very funny. */
-      activate = await fetch(guestTokenRequest);
+      activate = await fetch(guestTokenRequest.clone());
     }
 
     /* Let's grab that guest_token so we can use it */
@@ -162,6 +164,8 @@ export const fetchUsingGuest = async (
     conversation.guestToken = guestToken;
     return conversation;
   }
+
+  console.log('Twitter has repeatedly denied our requests, so we give up now');
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error - This is only returned if we completely failed to fetch the conversation
